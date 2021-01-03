@@ -25,9 +25,36 @@
 # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-import /init.recovery.qcom_decrypt.rc
-
 on fs
     wait /dev/block/platform/soc/${ro.boot.bootdevice}
     symlink /dev/block/platform/soc/${ro.boot.bootdevice} /dev/block/bootdevice
     export LD_LIBRARY_PATH /vendor/lib64:/vendor/lib64/hw
+    chmod 0660 /dev/qseecom
+    chown system drmrpc /dev/qseecom
+    chmod 0664 /dev/ion
+    chown system system /dev/ion
+    
+on property:ro.crypto.state=encrypted && property:hwservicemanager.ready=true
+    start qseecomd
+
+on property:vendor.sys.listeners.registered=true
+    start keymaster-4-0-qti
+
+on property:ro.crypto.type=block && property:ro.crypto.fs_crypto_blkdev=*
+    stop qseecomd
+    stop keymaster-4-0-qti
+
+service qseecomd /system/bin/qseecomd
+    user root
+    group root
+    disabled
+    oneshot
+    seclabel u:r:recovery:s0
+
+service keymaster-4-0-qti /system/bin/android.hardware.keymaster@4.0-service-qti
+    user root
+    group root
+    disabled
+    oneshot
+    seclabel u:r:recovery:s0
+
