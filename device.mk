@@ -29,3 +29,9 @@ PRODUCT_SOONG_NAMESPACES += \
 # Apex libraries
 PRODUCT_HOST_PACKAGES += \
     libandroidicu
+
+# QCOM decryption
+PRODUCT_PACKAGES += \
+    qcom_decrypt \
+    qcom_decrypt_fbe
+
